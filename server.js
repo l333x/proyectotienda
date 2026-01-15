@@ -5,8 +5,9 @@ const path = require('path');
 const connectDB = require('./src/config/db');
 require('dotenv').config();
 
-// Importar rutas de autenticación
-const authRoutes = require('./src/routes/authRoutes'); // NUEVO
+// --- IMPORTAR RUTAS ---
+const authRoutes = require('./src/routes/authRoutes');
+const shopRoutes = require('./src/routes/shopRoutes'); // <--- 1. IMPORTAMOS LA RUTA DE TIENDA
 
 // Conectar BD
 connectDB();
@@ -23,8 +24,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// --- RUTAS ---
-app.use('/auth', authRoutes); // NUEVO: Todo lo que sea /auth va al archivo de rutas
+// --- DEFINIR RUTAS (ENDPOINTS) ---
+app.use('/auth', authRoutes);
+app.use('/tienda', shopRoutes); // <--- 2. ACTIVAMOS LA RUTA /tienda
 
 app.get('/', (req, res) => {
     res.render('index', { 
@@ -33,9 +35,8 @@ app.get('/', (req, res) => {
     });
 });
 
-// ... (El resto de tu código de prueba-ia sigue igual abajo) ...
+// Ruta de prueba IA
 app.get('/prueba-ia', async (req, res) => {
-     // ... tu código existente ...
     try {
         console.log("📡 Conectando con el cerebro de Python...");
         const response = await axios.post(`${PYTHON_URL}/api/chat`, {
@@ -51,7 +52,6 @@ app.get('/prueba-ia', async (req, res) => {
         res.status(500).json({ estado: 'ERROR', detalle: 'El servicio de Python no responde.' });
     }
 });
-
 
 app.listen(PORT, () => {
     console.log(`🚀 Servidor NODE listo en: http://localhost:${PORT}`);
