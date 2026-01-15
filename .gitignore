@@ -1,0 +1,17 @@
+Dependencias de Node (Pesadas, se reinstalan con npm install)
+
+node_modules/
+
+Dependencias de Python (Entornos virtuales)
+
+venv/
+pycache/
+
+Variables de Entorno (Claves secretas, NUNCA subir a GitHub)
+
+.env
+
+Logs y Backups locales
+
+npm-debug.log
+/backups/*.json
