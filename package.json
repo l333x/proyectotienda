@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "concurrently \"npm start\" \"py python_service/app.py\"",
-    "dev:linux": "concurrently \"npm start\" \"python3 python_service/app.py\"",
+    "dev:linux": "concurrently \"npm start\" \"./venv/bin/python python_service/app.py\"",
     "install-all": "npm install && pip install -r python_service/requirements.txt"
   },
   "keywords": [],
