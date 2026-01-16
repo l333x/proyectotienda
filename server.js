@@ -8,7 +8,8 @@ require('dotenv').config();
 // --- IMPORTAR RUTAS ---
 const authRoutes = require('./src/routes/authRoutes');
 const shopRoutes = require('./src/routes/shopRoutes');
-const cartRoutes = require('./src/routes/cartRoutes'); // <--- NUEVO: Ruta del Carrito
+const cartRoutes = require('./src/routes/cartRoutes'); 
+const auditRoutes = require('./src/routes/auditRoutes'); // <--- NUEVO: Importar Auditoría
 
 // Conectar Base de Datos
 connectDB();
@@ -40,7 +41,8 @@ app.get('/home', (req, res) => {
 // 3. Rutas de Módulos
 app.use('/auth', authRoutes);
 app.use('/tienda', shopRoutes);
-app.use('/carrito', cartRoutes); // <--- NUEVO: Activamos la ruta /carrito
+app.use('/carrito', cartRoutes);
+app.use('/auditoria', auditRoutes); // <--- NUEVO: Activar ruta /auditoria
 
 // 4. API del Chatbot (Para que VisionBot funcione en Index y Shop)
 app.post('/chat', async (req, res) => {

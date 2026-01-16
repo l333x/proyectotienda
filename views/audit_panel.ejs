@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Auditoría - ISO 27001</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>body { background-color: #0d1117; color: #e6edf3; font-family: monospace; }</style>
+</head>
+<body class="p-10">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-8 border-b border-gray-700 pb-4">
+            <h1 class="text-3xl font-bold text-red-500">🛡️ SYSTEM AUDIT LOG</h1>
+            <a href="/home" class="text-blue-400 hover:underline">Volver al Inicio</a>
+        </div>
+
+        <div class="overflow-x-auto rounded-lg border border-gray-700">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-gray-800 text-gray-400 uppercase">
+                    <tr>
+                        <th class="px-6 py-3">Fecha / Hora</th>
+                        <th class="px-6 py-3">Usuario (Email)</th>
+                        <th class="px-6 py-3">Acción</th>
+                        <th class="px-6 py-3">Módulo</th>
+                        <th class="px-6 py-3">IP Origen</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700 bg-[#161b22]">
+                    <% if (logs.length > 0) { %>
+                        <% logs.forEach(log => { %>
+                            <tr class="hover:bg-gray-800 transition">
+                                <td class="px-6 py-4 text-gray-300"><%= new Date(log.fecha).toLocaleString() %></td>
+                                <td class="px-6 py-4 font-bold text-white"><%= log.email_usuario %></td>
+                                <td class="px-6 py-4">
+                                    <span class="px-2 py-1 rounded text-xs font-bold
+                                        <%= log.accion === 'LOGIN' ? 'bg-green-900 text-green-300' : 
+                                           log.accion === 'LOGOUT' ? 'bg-yellow-900 text-yellow-300' : 
+                                           log.accion === 'REGISTRO' ? 'bg-blue-900 text-blue-300' : 'bg-gray-700 text-gray-300' %>">
+                                        <%= log.accion %>
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-gray-400"><%= log.modulo %></td>
+                                <td class="px-6 py-4 font-mono text-gray-500"><%= log.ip %></td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="5" class="px-6 py-10 text-center text-gray-500">No hay registros de auditoría aún.</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+        <p class="mt-4 text-xs text-gray-600 text-right">Mostrando últimos 50 eventos registrados en MongoDB Atlas.</p>
+    </div>
+</body>
+</html>
