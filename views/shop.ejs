@@ -3,80 +3,374 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= titulo %></title>
+    <title>Tienda - GamerVision</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Iconos -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Fuentes -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700;900&display=swap" rel="stylesheet">
+
     <style>
-        body { background: #1a1a2e; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; }
+        body { font-family: 'Roboto', sans-serif; background-color: #121212; color: #e0e0e0; }
+        .text-accent { color: #ff6b00; }
+        .bg-accent { background-color: #ff6b00; }
         
-        /* Navbar Simple */
-        nav { background: #16213e; padding: 1rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
-        .logo { color: #e94560; font-weight: bold; font-size: 1.5rem; text-decoration: none; }
-        .nav-links a { color: white; text-decoration: none; margin-left: 20px; font-weight: 500; }
-        .nav-links a:hover { color: #e94560; }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ff6b00; }
 
-        /* Contenedor Principal */
-        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
-        
-        h1 { text-align: center; margin-bottom: 40px; color: #e94560; }
+        /* Estilos Tarjetas */
+        .product-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.5); border-color: #ff6b00; }
 
-        /* Grid de Productos */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; }
+        /* Inputs Generales */
+        .custom-input { background-color: #0f0f0f; border: 1px solid #333; color: white; transition: all 0.3s; }
+        .custom-input:focus { border-color: #ff6b00; outline: none; box-shadow: 0 0 0 1px rgba(255, 107, 0, 0.5); }
 
-        /* Tarjeta de Producto */
-        .card { background: #0f3460; border-radius: 10px; overflow: hidden; transition: transform 0.3s; position: relative; display: flex; flex-direction: column; }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-        
-        .card img { width: 100%; height: 200px; object-fit: cover; background: #fff; }
-        
-        .card-content { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; }
-        .card-title { font-size: 1.1rem; margin: 0 0 10px 0; font-weight: bold; }
-        .card-desc { font-size: 0.9rem; color: #ccc; margin-bottom: 15px; flex-grow: 1; }
-        
-        .card-price { font-size: 1.4rem; color: #4ecca3; font-weight: bold; margin-bottom: 15px; }
-        
-        .btn-buy { background: #e94560; color: white; border: none; padding: 10px; width: 100%; cursor: pointer; border-radius: 5px; font-weight: bold; transition: background 0.2s; }
-        .btn-buy:hover { background: #c0354e; }
+        /* Checkboxes Tienda */
+        .custom-checkbox { appearance: none; background-color: #1a1a1a; color: currentColor; width: 1.15em; height: 1.15em; border: 1px solid #444; border-radius: 0.15em; display: grid; place-content: center; cursor: pointer; }
+        .custom-checkbox::before { content: ""; width: 0.65em; height: 0.65em; transform: scale(0); box-shadow: inset 1em 1em white; clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%); }
+        .custom-checkbox:checked { background-color: #ff6b00; border-color: #ff6b00; }
+        .custom-checkbox:checked::before { transform: scale(1); }
 
-        /* Etiqueta de Categoría */
-        .badge { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; }
+        /* Animación Chat */
+        .typing-dot { animation: typing 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
+        /* Control de Vistas (SPA) */
+        .view-section { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Ocultar elementos globales en modo Chatbot Fullscreen */
+        body.chatbot-mode header, 
+        body.chatbot-mode footer,
+        body.chatbot-mode .top-bar,
+        body.chatbot-mode #mobile-chat-btn { display: none !important; }
     </style>
 </head>
-<body>
+<body class="flex flex-col min-h-screen relative">
 
-    <nav>
-        <a href="/" class="logo">GamerVision</a>
-        <div class="nav-links">
-            <a href="/tienda">Tienda</a>
-            <a href="/chat-ui">VisionBot AI</a>
-            <!-- Botón de Cerrar Sesión (Le pasamos un param dummy para auditoría por ahora) -->
-            <a href="/auth/logout?email=usuario_actual" style="color: #ff4d4d;">Cerrar Sesión 🚪</a>
-        </div>
-    </nav>
-
-    <div class="container">
-        <h1>🔥 Hardware Disponible</h1>
-
-        <% if(productos.length === 0) { %>
-            <div style="text-align: center; padding: 50px;">
-                <h2>El inventario está vacío 🕸️</h2>
-                <p>Ejecuta el script de carga o ve a <a href="/tienda/crear-datos" style="color: #4ecca3;">/tienda/crear-datos</a> para generar productos de prueba.</p>
+    <!-- HEADER SIMPLIFICADO CON NAVEGACIÓN -->
+    <header class="bg-[#1a1a1a] sticky top-0 z-50 shadow-lg border-b border-gray-800">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="/home" class="flex items-center gap-2 flex-shrink-0 cursor-pointer">
+                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-black font-bold text-xl">G</div>
+                <div class="flex flex-col">
+                    <span class="text-2xl font-black tracking-tighter text-white">GAMER<span class="text-[#ff6b00]">Vision</span></span>
+                </div>
+            </a>
+            
+            <!-- Buscador -->
+            <div class="hidden md:flex flex-1 max-w-xl mx-8 relative">
+                <input type="text" placeholder="Buscar productos..." class="w-full bg-[#0f0f0f] border border-gray-700 text-white py-2 px-4 rounded-full focus:outline-none focus:border-[#ff6b00] transition-colors">
+                <button class="absolute right-3 top-2 text-gray-400 hover:text-white"><i data-lucide="search" class="w-5 h-5"></i></button>
             </div>
-        <% } else { %>
-            <div class="grid">
-                <% productos.forEach(producto => { %>
-                    <div class="card">
-                        <div class="badge"><%= producto.categoria %></div>
-                        <img src="<%= producto.imagen %>" alt="<%= producto.nombre %>">
-                        <div class="card-content">
-                            <h3 class="card-title"><%= producto.nombre %></h3>
-                            <p class="card-desc"><%= producto.descripcion %></p>
-                            <div class="card-price">$<%= producto.precio %></div>
-                            <button class="btn-buy" onclick="alert('Funcionalidad de Carrito pendiente')">Añadir al Carrito 🛒</button>
+
+            <!-- Menú Navegación Desktop -->
+            <div class="flex items-center gap-6">
+                <!-- ENLACE DE SALIR (Corregido) -->
+                <a href="/auth/logout" class="text-gray-300 hover:text-red-500 transition flex flex-col items-center group" title="Cerrar Sesión">
+                    <i data-lucide="log-out" class="w-6 h-6"></i>
+                    <span class="hidden lg:block text-[10px] text-gray-400 mt-1">Salir</span>
+                </a>
+
+                <a href="#" class="relative flex items-center gap-2 group">
+                    <div class="relative">
+                        <i data-lucide="shopping-cart" class="w-6 h-6 text-gray-300 group-hover:text-[#ff6b00] transition"></i>
+                        <span class="absolute -top-2 -right-2 bg-[#ff6b00] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">0</span>
+                    </div>
+                </a>
+                <button id="mobile-menu-btn" class="md:hidden text-white hover:text-[#ff6b00] transition">
+                    <i data-lucide="menu" class="w-8 h-8"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Barra Categorías -->
+        <nav class="hidden md:block bg-[#252525] border-t border-gray-800">
+            <div class="container mx-auto px-4">
+                <ul class="flex items-center gap-8 text-sm font-bold text-gray-300 py-3 overflow-x-auto whitespace-nowrap">
+                    <li><a href="#" class="hover:text-[#ff6b00] transition flex items-center gap-2 text-white"><i data-lucide="grid" class="w-4 h-4"></i> TODAS LAS CATEGORÍAS</a></li>
+                    <li><a href="#" class="hover:text-white transition">COMPONENTES</a></li>
+                    <li><a href="#" class="hover:text-white transition">PERIFÉRICOS</a></li>
+                    <li><a href="#" class="hover:text-white transition text-[#ff6b00]">OFERTAS</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Menú Móvil -->
+    <div id="mobile-menu" class="fixed inset-y-0 right-0 w-64 bg-[#1a1a1a] z-50 transform translate-x-full shadow-2xl border-l border-gray-800 flex flex-col">
+        <div class="p-5 flex justify-between items-center border-b border-gray-800">
+            <span class="text-lg font-bold text-white">Menú</span>
+            <button id="close-menu-btn" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+        <div class="p-5 flex-1 overflow-y-auto">
+            <ul class="space-y-6 text-lg font-medium text-gray-300">
+                <li><a href="/home" class="flex items-center gap-3 text-[#ff6b00]"><i data-lucide="home" class="w-5 h-5"></i> Inicio</a></li>
+                <li><a href="/tienda" class="flex items-center gap-3 hover:text-white transition"><i data-lucide="shopping-bag" class="w-5 h-5"></i> Tienda</a></li>
+                <li class="border-t border-gray-800 pt-6 mt-6">
+                    <a href="/auth/logout" class="flex items-center gap-3 text-red-500 hover:text-red-400 transition"><i data-lucide="log-out" class="w-5 h-5"></i> Cerrar Sesión</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div id="menu-overlay" class="fixed inset-0 bg-black/50 z-40 hidden backdrop-blur-sm"></div>
+
+    <!-- *************************************************************** -->
+    <!--                SECCIÓN 2: TIENDA COMPLETA                       -->
+    <!-- *************************************************************** -->
+    <!-- Nota: Esta sección tiene la clase 'active' por defecto -->
+    <div id="shop-view" class="view-section active bg-[#121212] min-h-screen pb-12">
+        
+        <!-- Breadcrumb / Header Tienda -->
+        <div class="bg-[#1a1a1a] border-b border-gray-800 py-8 mb-8">
+            <div class="container mx-auto px-4">
+                <h1 class="text-3xl font-black text-white uppercase tracking-wider">Tienda <span class="text-[#ff6b00]">Gamer</span></h1>
+                <div class="text-xs text-gray-500 mt-2 flex items-center gap-2">
+                    <a href="/home" class="hover:text-white">Inicio</a> 
+                    <i data-lucide="chevron-right" class="w-3 h-3"></i> 
+                    <span class="text-[#ff6b00]">Tienda</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="container mx-auto px-4 flex flex-col lg:flex-row gap-8">
+            
+            <!-- SIDEBAR FILTROS -->
+            <aside class="hidden lg:block w-1/4 flex-shrink-0">
+                <div class="bg-[#1a1a1a] rounded-lg border border-gray-800 p-6 sticky top-24">
+                    <h3 class="text-lg font-bold text-white mb-6 border-b-2 border-[#ff6b00] inline-block pb-1">FILTROS</h3>
+
+                    <div class="mb-6">
+                        <h4 class="text-sm font-bold text-gray-300 mb-3 uppercase tracking-wide">Categorías</h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" class="custom-checkbox"><span class="text-sm text-gray-400 group-hover:text-white transition">Laptops Gamer</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" class="custom-checkbox"><span class="text-sm text-gray-400 group-hover:text-white transition">PC Escritorio</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" class="custom-checkbox"><span class="text-sm text-gray-400 group-hover:text-white transition">Tarjetas de Video</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" class="custom-checkbox"><span class="text-sm text-gray-400 group-hover:text-white transition">Monitores</span></label>
                         </div>
                     </div>
-                <% }); %>
-            </div>
-        <% } %>
+
+                    <div class="mb-6 pt-6 border-t border-gray-800">
+                        <h4 class="text-sm font-bold text-gray-300 mb-3 uppercase tracking-wide">Precio ($)</h4>
+                        <div class="flex items-center gap-2 mb-4">
+                            <input type="number" placeholder="Min" class="custom-input w-full p-2 text-xs rounded text-center">
+                            <span class="text-gray-500">-</span>
+                            <input type="number" placeholder="Max" class="custom-input w-full p-2 text-xs rounded text-center">
+                        </div>
+                        <button class="w-full bg-[#333] hover:bg-[#ff6b00] text-white text-xs font-bold py-2 rounded transition uppercase">Aplicar</button>
+                    </div>
+
+                    <div class="mb-6 pt-6 border-t border-gray-800">
+                        <h4 class="text-sm font-bold text-gray-300 mb-3 uppercase tracking-wide">Marcas</h4>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="custom-checkbox"><span class="text-xs text-gray-400">ASUS</span></label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="custom-checkbox"><span class="text-xs text-gray-400">MSI</span></label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="custom-checkbox"><span class="text-xs text-gray-400">Gigabyte</span></label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="custom-checkbox"><span class="text-xs text-gray-400">Logitech</span></label>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- GRID PRODUCTOS (CONECTADO A BD) -->
+            <main class="flex-1">
+                <div class="bg-[#1a1a1a] rounded border border-gray-800 p-4 mb-6 flex justify-between items-center">
+                    <p class="text-sm text-gray-400">Mostrando productos disponibles</p>
+                    <select class="custom-input p-2 text-sm rounded cursor-pointer">
+                        <option>Ordenar por: Defecto</option>
+                        <option>Precio: Bajo a Alto</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    
+                    <% if (typeof productos !== 'undefined' && productos.length > 0) { %>
+                        <% productos.forEach(producto => { %>
+                            <div class="product-card bg-[#1a1a1a] rounded-xl overflow-hidden border border-gray-800 relative group flex flex-col">
+                                <div class="h-48 bg-white p-4 flex items-center justify-center relative">
+                                    <img src="<%= producto.imagen %>" class="object-contain h-full group-hover:scale-110 transition duration-500" alt="<%= producto.nombre %>">
+                                </div>
+                                <div class="p-4 flex-1 flex flex-col">
+                                    <h3 class="font-bold text-white text-sm mb-2 h-10 overflow-hidden"><%= producto.nombre %></h3>
+                                    <p class="text-xs text-gray-400 mb-4 h-10 overflow-hidden"><%= producto.descripcion %></p>
+                                    <div class="mt-auto border-t border-gray-700 pt-3">
+                                        <div class="flex justify-between items-center mb-1"><span class="text-xs text-gray-500">Stock: <%= producto.stock %></span></div>
+                                        <div class="flex justify-between items-center"><span class="text-xs text-[#ff6b00] font-bold">PRECIO</span><span class="text-lg font-black text-white">$<%= producto.precio %></span></div>
+                                        
+                                        <!-- FORMULARIO DE AÑADIR AL CARRITO -->
+                                        <form action="/carrito/agregar" method="POST" class="w-full mt-3">
+                                            <input type="hidden" name="productoId" value="<%= producto._id %>">
+                                            <button type="submit" class="w-full bg-gray-800 hover:bg-[#ff6b00] text-white font-bold py-2 rounded text-sm transition flex items-center justify-center gap-2">
+                                                <i data-lucide="shopping-cart" class="w-4 h-4"></i> Añadir
+                                            </button>
+                                        </form>
+
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="col-span-3 text-center py-10 border border-dashed border-gray-700 rounded-lg">
+                            <h3 class="text-xl text-gray-500">Cargando inventario...</h3>
+                            <p class="text-sm text-gray-600 mt-2">Si está vacío, ve a <a href="/tienda/crear-datos" class="text-[#ff6b00]">/tienda/crear-datos</a></p>
+                        </div>
+                    <% } %>
+
+                </div>
+
+                <!-- Paginación -->
+                <div class="flex justify-center gap-2">
+                    <button class="w-10 h-10 bg-[#ff6b00] text-white font-bold rounded flex items-center justify-center">1</button>
+                    <button class="w-10 h-10 bg-[#1a1a1a] text-gray-400 border border-gray-700 hover:border-white hover:text-white rounded flex items-center justify-center transition">2</button>
+                    <button class="w-10 h-10 bg-[#1a1a1a] text-gray-400 border border-gray-700 hover:border-white hover:text-white rounded flex items-center justify-center transition">3</button>
+                </div>
+            </main>
+        </div>
     </div>
 
+    <!-- *************************************************************** -->
+    <!--                SECCIÓN 4: CHATBOT (AÑADIDO AL FINAL)            -->
+    <!-- *************************************************************** -->
+    <div id="chatbot-view" class="view-section bg-[#0a0a0a] min-h-screen flex flex-col hidden">
+        <div class="bg-[#1a1a1a] border-b border-gray-800 p-4 shadow-md flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-[#ff6b00] rounded-full flex items-center justify-center shadow-lg shadow-orange-900/50">
+                    <i data-lucide="bot" class="w-7 h-7 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black text-white tracking-wider">GamerVision <span class="text-[#ff6b00]">AI</span></h1>
+                    <p class="text-xs text-gray-400 flex items-center gap-2"><span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Sistema en línea</p>
+                </div>
+            </div>
+            <!-- Botón Cerrar (Vuelve a shop-view) -->
+            <button onclick="toggleChat()" class="text-gray-400 hover:text-white flex items-center gap-2 border border-gray-700 px-3 py-1.5 rounded hover:bg-[#333] transition">
+                <i data-lucide="x" class="w-4 h-4"></i> <span class="hidden sm:inline">Cerrar Chat</span>
+            </button>
+        </div>
+
+        <div class="flex-1 container mx-auto p-4 md:p-8 flex flex-col max-w-4xl">
+            <div class="flex-1 bg-[#121212] rounded-lg border border-gray-800 p-6 overflow-y-auto space-y-6 shadow-inner relative" id="chat-box">
+                <div class="flex gap-4">
+                    <div class="w-10 h-10 bg-[#1a1a1a] border border-[#ff6b00] rounded-full flex items-center justify-center flex-shrink-0"><i data-lucide="bot" class="w-5 h-5 text-[#ff6b00]"></i></div>
+                    <div class="bg-[#1a1a1a] border border-gray-800 p-4 rounded-r-xl rounded-bl-xl text-gray-300 max-w-lg shadow-lg">
+                        <p class="mb-2 font-bold text-white">¡Hola, Gamer! 🎮</p>
+                        <p>Soy tu asistente virtual. ¿En qué te puedo ayudar hoy?</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 relative">
+                <input type="text" id="user-input" placeholder="Escribe aquí..." class="w-full bg-[#1a1a1a] border border-gray-700 text-white rounded-full pl-6 pr-14 py-4 focus:outline-none focus:border-[#ff6b00] shadow-xl" onkeypress="handleEnter(event)">
+                <button onclick="sendMessage()" class="absolute right-3 top-3 bg-[#ff6b00] hover:bg-[#e65100] text-white p-2 rounded-full transition transform hover:scale-105"><i data-lucide="send" class="w-5 h-5"></i></button>
+            </div>
+            <div class="text-center mt-2 text-xs text-gray-600">Powered by AI</div>
+        </div>
+    </div>
+
+    <!-- BOTÓN CHAT FLOTANTE -->
+    <button id="mobile-chat-btn" onclick="toggleChat()" class="fixed bottom-6 left-6 z-40 bg-[#ff6b00] hover:bg-[#e65100] text-white p-4 rounded-full shadow-[0_0_15px_rgba(255,107,0,0.5)] transition transform hover:scale-110 flex items-center justify-center group">
+        <i data-lucide="message-square" class="w-7 h-7"></i>
+        <span class="absolute left-full ml-3 bg-[#1a1a1a] text-white text-xs px-2 py-1 rounded border border-[#ff6b00] opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">Chat IA</span>
+    </button>
+
+    <footer class="bg-[#0a0a0a] border-t border-gray-800 py-8 mt-auto"><div class="container mx-auto px-4 text-center"><p class="text-xs text-gray-600">© 2024 GamerVision.</p></div></footer>
+
+    <script>
+        lucide.createIcons();
+        const mobileMenu = document.getElementById('mobile-menu');
+        const overlay = document.getElementById('menu-overlay');
+        document.getElementById('mobile-menu-btn').addEventListener('click', toggleMenu);
+        document.getElementById('close-menu-btn').addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+        function toggleMenu() {
+            const isClosed = mobileMenu.classList.contains('translate-x-full');
+            if (isClosed) { mobileMenu.classList.remove('translate-x-full'); overlay.classList.remove('hidden'); }
+            else { mobileMenu.classList.add('translate-x-full'); overlay.classList.add('hidden'); }
+        }
+
+        // --- FUNCIÓN CORREGIDA DEL BOTÓN ---
+        function toggleChat() {
+            const chatbotView = document.getElementById('chatbot-view');
+            
+            // Si el chat está oculto, mostrarlo y ocultar la tienda
+            if (chatbotView.classList.contains('hidden') || !chatbotView.classList.contains('active')) {
+                // Ir al Chat
+                switchView('chatbot-view');
+            } else {
+                // Volver a la Tienda
+                switchView('shop-view');
+            }
+        }
+
+        function switchView(viewId) {
+            // Ocultar todo
+            document.querySelectorAll('.view-section').forEach(el => {
+                el.classList.remove('active');
+                if(el.id === 'chatbot-view') el.classList.add('hidden'); // Asegurar que el chat se oculte visualmente si no es el activo
+            });
+            
+            // Mostrar el elegido
+            const selected = document.getElementById(viewId);
+            selected.classList.add('active');
+            selected.classList.remove('hidden'); // Quitar hidden del chat
+            
+            if (viewId === 'chatbot-view') {
+                document.body.classList.add('chatbot-mode');
+            } else {
+                document.body.classList.remove('chatbot-mode');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- LÓGICA CHATBOT REAL ---
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+
+        function handleEnter(e) { if (e.key === 'Enter') sendMessage(); }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+            addMessage(text, 'user');
+            userInput.value = '';
+
+            try {
+                // LLAMADA REAL A LA API
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mensaje: text })
+                });
+                const data = await response.json();
+                if (data.analisis) addMessage(data.analisis, 'bot');
+                else addMessage("Error de conexión.", 'bot');
+            } catch (error) {
+                addMessage("Error crítico al contactar IA.", 'bot');
+            }
+        }
+
+        function addMessage(text, type) {
+            const div = document.createElement('div');
+            if (type === 'user') {
+                div.className = "flex gap-4 justify-end";
+                div.innerHTML = `<div class="bg-[#ff6b00] p-4 rounded-l-xl rounded-br-xl text-white max-w-lg shadow-lg"><p>${text}</p></div>`;
+            } else {
+                div.className = "flex gap-4";
+                div.innerHTML = `<div class="w-10 h-10 bg-[#1a1a1a] border border-[#ff6b00] rounded-full flex items-center justify-center flex-shrink-0"><i data-lucide="bot" class="w-5 h-5 text-[#ff6b00]"></i></div><div class="bg-[#1a1a1a] border border-gray-800 p-4 rounded-r-xl rounded-bl-xl text-gray-300 max-w-lg shadow-lg"><p>${text}</p></div>`;
+            }
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            lucide.createIcons();
+        }
+    </script>
 </body>
 </html>

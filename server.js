@@ -8,8 +8,9 @@ require('dotenv').config();
 // --- IMPORTAR RUTAS ---
 const authRoutes = require('./src/routes/authRoutes');
 const shopRoutes = require('./src/routes/shopRoutes');
+const cartRoutes = require('./src/routes/cartRoutes'); // <--- NUEVO: Ruta del Carrito
 
-// Conectar BD
+// Conectar Base de Datos
 connectDB();
 
 const app = express();
@@ -24,54 +25,36 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// --- DEFINIR RUTAS (ENDPOINTS) ---
-app.use('/auth', authRoutes);
-app.use('/tienda', shopRoutes);
+// --- RUTAS PRINCIPALES ---
 
-// 1. Landing Page / Home -> AHORA REDIRIGE AL LOGIN (Seguridad primero)
+// 1. Ruta Raíz: Redirige SIEMPRE al Login (Requisito)
 app.get('/', (req, res) => {
-    // Si entras a la raíz, te mando a identificarte.
     res.redirect('/auth/login');
 });
 
-// 2. NUEVO: Vista del Chat (La interfaz bonita)
-app.get('/chat-ui', (req, res) => {
-    res.render('chat'); // Esto carga el archivo views/chat.ejs
+// 2. Ruta Inicio (Landing Page): A donde llegas después de loguearte
+app.get('/home', (req, res) => {
+    res.render('index');
 });
 
-// 3. API del Chat (El cerebro que habla con Python)
+// 3. Rutas de Módulos
+app.use('/auth', authRoutes);
+app.use('/tienda', shopRoutes);
+app.use('/carrito', cartRoutes); // <--- NUEVO: Activamos la ruta /carrito
+
+// 4. API del Chatbot (Para que VisionBot funcione en Index y Shop)
 app.post('/chat', async (req, res) => {
     try {
         const { mensaje } = req.body;
-        if (!mensaje) return res.status(400).json({ error: "Mensaje vacío" });
-
-        console.log("💬 Enviando a Gemini:", mensaje);
-        
-        // Comunicación con Python
+        // Conexión con Python
         const response = await axios.post(`${PYTHON_URL}/api/chat`, { mensaje });
         res.json(response.data);
-
     } catch (error) {
-        console.error("❌ Error IA:", error.message);
-        res.status(500).json({ 
-            autor: "Sistema", 
-            analisis: "El cerebro de IA está desconectado temporalmente." 
-        });
-    }
-});
-
-// 4. Ruta de prueba técnica
-app.get('/prueba-ia', async (req, res) => {
-    try {
-        const response = await axios.post(`${PYTHON_URL}/api/chat`, {
-            mensaje: "Ping de prueba desde Node"
-        });
-        res.json(response.data);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error("Error Chat:", error.message);
+        res.status(500).json({ autor: "Sistema", analisis: "Error de conexión con la IA." });
     }
 });
 
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor NODE listo en: http://localhost:${PORT}`);
+    console.log(`🚀 Servidor GamerVision listo en: http://localhost:${PORT}`);
 });

@@ -18,7 +18,8 @@ const ProductSchema = new mongoose.Schema({
     categoria: {
         type: String,
         required: true,
-        enum: ['Teclados', 'Mouse', 'Monitores', 'Componentes', 'Laptops', 'Audio']
+        // CORRECCIÓN: Agregamos 'Periféricos' a la lista para que no de error el seed
+        enum: ['Teclados', 'Mouse', 'Monitores', 'Componentes', 'Laptops', 'Audio', 'Periféricos']
     },
     stock: {
         type: Number,
